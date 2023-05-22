@@ -10,8 +10,15 @@ echo "Enter REALNAME:"
 read REALNAME
 echo "Enter EMAIL:"
 read EMAIL
+stty -echo
+echo "Enter passphrase:"
+read PASS
+stty echo
+echo "Generating prv key..."
 
-REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -e -s -a > prv.asc
+echo $PASS > ~/.p
+
+REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e -s -a > prv.asc
 gpg --import prv.asc
 rm prv.asc
 #passphrase2pgp -e -s -a -p > pub.asc
@@ -28,10 +35,12 @@ pkill -HUP gpg-agent
 
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
-REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -e1 -s -a -f ssh > ~/.ssh/id_rsa
-REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -e1 -s -a -p -f ssh > ~/.ssh/id_rsa.pub
+REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e1 -s -a -f ssh > ~/.ssh/id_rsa
+REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e1 -s -a -p -f ssh > ~/.ssh/id_rsa.pub
 chmod 600 ~/.ssh/id*
 
 pkill -HUP ssh-agent
+
+rm ~/.p
 
 ########
