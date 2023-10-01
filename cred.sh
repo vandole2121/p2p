@@ -18,6 +18,15 @@ echo "Generating prv key..."
 
 echo $PASS > ~/.p
 
+mkdir -p ~/.local/share/gnupg
+ln -s ~/.local/share/gnupg/ ~/.gnupg
+chmod 700 ~/.gnupg
+echo > ~/.local/share/gnupg/gpg-agent.conf "default-cache-ttl 600"
+echo >> ~/.local/share/gnupg/gpg-agent.conf "max-cache-ttl 900"
+echo >> ~/.local/share/gnupg/gpg-agent.conf "enable-ssh-support"
+
+pacman -U ~/passphrase2pgp-1.2.1-1-x86_64.pkg.tar.zst
+
 REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e -s -a > prv.asc
 gpg --import prv.asc
 rm prv.asc
