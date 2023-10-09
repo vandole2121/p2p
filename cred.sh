@@ -2,18 +2,29 @@
 
 ### Credentials
 
-echo "Setup credentials... Make sure you are on the right user! (Ctrl-C to quit, Enter to continue)"
-read
-REALNAME=""
-EMAIL=""
-echo "Enter REALNAME:"
-read REALNAME
-echo "Enter EMAIL:"
-read EMAIL
-stty -echo
-echo "Enter passphrase:"
-read PASS
-stty echo
+REALNAME=$1
+EMAIL=$2
+PASS=$3
+
+if [ -z "$REALNAME" ]; then
+
+	echo "Setup credentials... Make sure you are on the right user! (Ctrl-C to quit, Enter to continue)"
+	read
+	echo "Enter REALNAME:"
+	read REALNAME
+	echo "Enter EMAIL:"
+	read EMAIL
+	stty -echo
+	echo "Enter passphrase:"
+	read PASS
+	stty echo
+else
+	echo "Using REALNAME: $REALNAME, EMAIL: $EMAIL"
+fi
+
+	echo "Using REALNAME: $REALNAME, EMAIL: $EMAIL, Enter to continue ..."
+read 
+
 echo "Generating prv key..."
 
 echo $PASS > ~/.p
@@ -25,7 +36,9 @@ echo > ~/.local/share/gnupg/gpg-agent.conf "default-cache-ttl 600"
 echo >> ~/.local/share/gnupg/gpg-agent.conf "max-cache-ttl 900"
 echo >> ~/.local/share/gnupg/gpg-agent.conf "enable-ssh-support"
 
-pacman -U ~/passphrase2pgp-1.2.1-1-x86_64.pkg.tar.zst
+sudo pacman -U passphrase2pgp-1.2.1-1-x86_64.pkg.tar.zst
+
+echo "generating keys..."
 
 REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e -s -a > prv.asc
 gpg --import prv.asc
@@ -42,11 +55,15 @@ gpg -K --keyid-format long
 
 pkill -HUP gpg-agent
 
+echo "generating keys..."
+
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e1 -s -a -f ssh > ~/.ssh/id_rsa
 REALNAME=$REALNAME EMAIL=$EMAIL passphrase2pgp -i ~/.p -e1 -s -a -p -f ssh > ~/.ssh/id_rsa.pub
 chmod 600 ~/.ssh/id*
+
+echo >> ~/.local/share/gnupg/gpg-agent.conf "pinentry-program /sbin/pinentry-gnome3"
 
 pkill -HUP ssh-agent
 
